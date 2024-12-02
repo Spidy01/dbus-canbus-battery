@@ -1,0 +1,1 @@
+@reboot sleep 10 && /usr/bin/env python3 /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
