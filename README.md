@@ -5,7 +5,7 @@ As such, all information, files, suggestions are to be used at your own risk, I 
 
 ## THIS SOLUTION DOES NOT PERSIST SOFTWARE UPDATES TO THE CERBO GX ##
 You will be required to repeat the steps below after each update. If you have some tips on how I can improve this solution to persist updates I'd be very appreciative.
-
+The solution is confirmed working for Venus OS v3.52 on Cerbo GX.
 
 # Background
 This solution follows on from the previous project: [Samsung-Victron-ESS](https://github.com/o-snoopy-o/Samsung-Victron-ESS) which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
