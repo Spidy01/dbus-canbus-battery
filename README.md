@@ -9,7 +9,7 @@ You will be required to repeat the steps below after each update. If you have so
 
 # Background
 This solution follows on from the previous project: [Samsung-Victron-ESS](https://github.com/o-snoopy-o/Samsung-Victron-ESS) which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
-From this point forward i will refer to the Venus OS device as Cerbo GX and instructions are for windows users. If there is a need I can also provide the same for Linux users but I think you'll be more than capable to apply to your way of working.
+From this point forward I will refer to the Venus OS device as Cerbo GX and instructions are for windows users. If there is a need I can also provide the same for Linux users but I think you'll be more than capable to apply to your way of working.
 
 
 
@@ -50,20 +50,24 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 5) Copy the 'root' file to: /var/spool/cron . You now must navigate upwards to the root folder then into the /var/spool/cron folder. Copy the root file to this folder. This file ensures that the service will start whenever the Cerbo is rebooted and will ensure the service is restarted should there be any error. The service will not run without this file unless you start it manually with python dbus-canbus-battery.py from within the /opt/victronenergy/ folder.
 
 ![image](https://github.com/user-attachments/assets/93edb01a-4cc1-4dab-af6b-296673b385d9)
+
    
-6) Access the Cerbo GX through Putty and execute the 'reboot' command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using 'ping -t 192.168.1.20' in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
+6) Access the Cerbo GX through Putty and execute the `reboot` command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using `ping -t 192.168.1.20` in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
 
 ![image](https://github.com/user-attachments/assets/0c76939c-a636-4963-9bcd-fb3c8b109e44)
+
    
 7) Go to the fridge and retrieve a cold beverage.
 
 ![image](https://github.com/user-attachments/assets/d8a0f30d-d6a3-47a3-a227-b48e706fbccb)
+
     
 8) Restart your Putty Session. After the device is responding to ping again or after some 2 minutes, Right click your putty window's top bar and select 'Restart Session'. Login with root and your password set earlier.
 
 ![image](https://github.com/user-attachments/assets/2162be36-0e93-4763-9b2a-774ada502acc)
 
-9) Issue the command: 'ps | grep dbus-canbus-battery.py'. You should see something like this:
+
+9) Issue the command: `ps | grep dbus-canbus-battery.py`. You should see something like this:
 
 root@einstein:~# ps | grep dbus-canbus-battery.py
 904 root     31152 S    python3 /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
@@ -73,6 +77,37 @@ The first line or process 904 in my case is the one that confirms the service is
 The second line is the command that was just run and is process 2128 in my case.
 If you only have the line with grep dbus-canbus-battery.py present then the service is NOT running and you need to troubleshoot why. 
 ![image](https://github.com/user-attachments/assets/eab00326-4b2a-4e25-b8b9-c53e08577085)
+
+
+# Troubleshooting
+You may run into some issues if I've forgotten any dependencies since I started this little project.
+Here are some potential fixes that you should execute in Putty session to the Cerbo GX.
+
+- Permissions not set for the files:
+```bash
+chmod +x /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
+chmod 644 /var/spool/cron/root
+```
+
+- Python Not Installed or Incompatible Version or Missing Dependencies
+```bash
+python3 --version
+```
+```bash
+opkg update
+opkg install python3
+```
+```bash
+pip3 install dbus-python python-can
+```
+- Manual Service Starting
+```bash
+python3 /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
+```
+- View Logs
+```bash
+tail -n 50 /var/log/syslog
+```
 
 # Proof it works :p
 
