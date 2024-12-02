@@ -7,13 +7,13 @@ As such, all information, files, suggestions are to be used at your own risk, I 
 You will be required to repeat the steps below after each update. If you have some tips on how I can improve this solution to persist updates I'd be very appreciative.
 
 
-# Background -
+# Background
 This solution follows on from the previous project: https://github.com/o-snoopy-o/Samsung-Victron-ESS which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
-From this point forwrd i will refer to the Venus OS device as Cerbo GX and instructions are for windows users. If there is a need I can also provide the same for linux users but I think you'll be more than capable to apply to your way of working.
+From this point forward i will refer to the Venus OS device as Cerbo GX and instructions are for windows users. If there is a need I can also provide the same for Linux users but I think you'll be more than capable to apply to your way of working.
 
 
 
-# Quick Start -
+# Quick Start
 1) Make a cable that joins the GND,HIGH,LOW pins on your Battery BMS to the Cerbo GX corresponding pins.
 2) Enable root account and SSH: https://www.victronenergy.com/live/ccgx:root_access
 3) Access the Cerbo GX through WinSCP.
@@ -27,9 +27,9 @@ From this point forwrd i will refer to the Venus OS device as Cerbo GX and instr
 
 
 
-# Detailed Guide -
+# Detailed Guide
 1) Make a cable that joins the GND,HIGH,LOW pins on your Battery BMS to the Cerbo GX corresponding pins. GND = Pin 3, CAN-Low = Pin 8, CAN-High = Pin 7. The Samsung BMS in the ELPM482-00005 module uses Pins: GND = Pin 3, CAN-Low = Pin 2, CAN-High = Pin 1. Using CAT5/6 type twisted pair cable is recommended, RJ45 ends are essential to interface with each device. The unused conductors can be cut but it does make insertion into the RJ45 plug difficult. Lubricate the wires prior to insertion using a non-corrosive product designed for such purpose.
-Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The port on the Cerbo GX is the BMS-CAN. You must fit a termination resistor to the other port labelles BMS-CAN. On the battery BMS, you may need to flick a switch (in the case of the ELPM482-00005 module the switch is built in and can be enabled by sliding the switch to the right. As a reminder to the Samsung ELPM482-00005 module users, the CANBUS port is the one on the far left of the 4. Also, ensure all the modules have unique ID's, I recommend just connecting 1 module for initial testing.
+Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The port on the Cerbo GX is the BMS-CAN. You must fit a termination resistor to the other port labelled BMS-CAN. On the battery BMS, you may need to flick a switch (in the case of the ELPM482-00005 module the switch is built in and can be enabled by sliding the switch to the right. As a reminder to the Samsung ELPM482-00005 module users, the CANBUS port is the one on the far left of the 4. Also, ensure all the modules have unique ID's, I recommend just connecting 1 module for initial testing.
 
 ![image](https://github.com/user-attachments/assets/4ad995dc-184f-4d3c-8e2b-2dd06780d1b7)
 
@@ -47,11 +47,11 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 ![image](https://github.com/user-attachments/assets/d675bf4b-a5d7-4f40-9af2-629d71e58b53)
 
 
-5) Copy the 'root' file to: /var/spool/cron . You now must navigate upwards to the root folder then into the /var/sppol/cron folder. Copy the root file to this folder. This file ensures that the service will start whenever the Cerbo is rebooted and will ensure the service is restarted should there be any error. The service will not run without this file unless you start it manually with python dbus-canbus-battery.py from within the /opt/victronenergy/ folder.
+5) Copy the 'root' file to: /var/spool/cron . You now must navigate upwards to the root folder then into the /var/spool/cron folder. Copy the root file to this folder. This file ensures that the service will start whenever the Cerbo is rebooted and will ensure the service is restarted should there be any error. The service will not run without this file unless you start it manually with python dbus-canbus-battery.py from within the /opt/victronenergy/ folder.
 
 ![image](https://github.com/user-attachments/assets/93edb01a-4cc1-4dab-af6b-296673b385d9)
    
-6) Access the Cerbo GX through Putty and execute the reboot command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interupted. The system should reboot and be running again with 2 minutes. You can always monitor this using 'ping -t 192.168.1.20' in a cmd session. (start>run>cmd), replace the ip address witht he actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
+6) Access the Cerbo GX through Putty and execute the reboot command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using 'ping -t 192.168.1.20' in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
 
 ![image](https://github.com/user-attachments/assets/0c76939c-a636-4963-9bcd-fb3c8b109e44)
    
@@ -74,7 +74,7 @@ The second line is the command that was just run and is process 2128 in my case.
 If you only have the line with grep dbus-canbus-battery.py present then the service is NOT running and you need to troubleshoot why. 
 ![image](https://github.com/user-attachments/assets/eab00326-4b2a-4e25-b8b9-c53e08577085)
 
-# Proof it works :p - 
+# Proof it works :p
 
 ![image](https://github.com/user-attachments/assets/80d5c3f2-5052-40a4-8ed3-e2d0ea1e4bf4)
 ![image](https://github.com/user-attachments/assets/beb02c80-8f72-4fdd-8ef7-7365b3495645)
