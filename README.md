@@ -8,14 +8,14 @@ You will be required to repeat the steps below after each update. If you have so
 
 
 # Background
-This solution follows on from the previous project: https://github.com/o-snoopy-o/Samsung-Victron-ESS which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
+This solution follows on from the previous project: [Samsung-Victron-ESS](https://github.com/o-snoopy-o/Samsung-Victron-ESS) which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
 From this point forward i will refer to the Venus OS device as Cerbo GX and instructions are for windows users. If there is a need I can also provide the same for Linux users but I think you'll be more than capable to apply to your way of working.
 
 
 
 # Quick Start
 1) Make a cable that joins the GND,HIGH,LOW pins on your Battery BMS to the Cerbo GX corresponding pins.
-2) Enable root account and SSH: https://www.victronenergy.com/live/ccgx:root_access
+2) Enable root account and SSH: [Root Access](https://www.victronenergy.com/live/ccgx:root_access)
 3) Access the Cerbo GX through WinSCP.
 4) Copy the 'dbus-canbus-battery' folder to: /opt/victronenergy/
 5) Copy the 'root' file to: /var/spool/cron
@@ -34,7 +34,7 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 ![image](https://github.com/user-attachments/assets/4ad995dc-184f-4d3c-8e2b-2dd06780d1b7)
 
 
-2) Follow the guide at the victron site: https://www.victronenergy.com/live/ccgx:root_access
+2) Follow the guide at the victron site: [Root Access](https://www.victronenergy.com/live/ccgx:root_access)
 
 
 3) Download WinSCP if you are a windows user and set up a new connection to your Cerbo GX using the root account details you have just created. You should be presented with a list of folders and files. As an example:
@@ -51,7 +51,7 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 
 ![image](https://github.com/user-attachments/assets/93edb01a-4cc1-4dab-af6b-296673b385d9)
    
-6) Access the Cerbo GX through Putty and execute the reboot command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using 'ping -t 192.168.1.20' in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
+6) Access the Cerbo GX through Putty and execute the 'reboot' command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using 'ping -t 192.168.1.20' in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
 
 ![image](https://github.com/user-attachments/assets/0c76939c-a636-4963-9bcd-fb3c8b109e44)
    
