@@ -12,10 +12,10 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 # Configure logging to write to a file with timestamps
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.WARNING,
     format='%(asctime)s %(levelname)s: %(message)s',
     filename='/var/log/dbus-canbus-battery.log',
-    filemode='a'  # append to file
+    filemode='a'
 )
 
 # Set the PYTHONPATH programmatically to ensure 'vedbus' can be found
