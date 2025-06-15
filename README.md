@@ -55,26 +55,22 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 
 5) Copy the 'inittab' file to: /etc/ . You now must navigate upwards to the root folder then into the /etc/ folder. Copy the inittab file to this folder. This file ensures that the service will start whenever the Cerbo is rebooted and will ensure the service is restarted should there be any error. The service will not run without this file unless you start it manually with python dbus-canbus-battery.py from within the /opt/victronenergy/ folder.
 
-![image](https://github.com/user-attachments/assets/5e0ab604-8f97-4c8d-b3d3-72d596b70bb1)
-
-
+6) Now set the permissions for the files:
+```bash
+chmod +x /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
+chmod +x /opt/victronenergy/dbus-canbus-battery/start-delayed.sh
+```
    
-6) Access the Cerbo GX through Putty and execute the `reboot` command. At this time, your remote console, your putty session, your WinSCP and all Cerbo functions will be interrupted. The system should reboot and be running again with 2 minutes. You can always monitor this using `ping -t 192.168.1.20` in a cmd session. (start>run>cmd), replace the ip address with the actual ip address of your Cerbo GX. You'll probably want to do this before you issue the reboot command so you know you have the right IP address.
-
-![image](https://github.com/user-attachments/assets/0c76939c-a636-4963-9bcd-fb3c8b109e44)
-
-   
-7) Go to the fridge and retrieve a cold beverage.
-
-![image](https://github.com/user-attachments/assets/d8a0f30d-d6a3-47a3-a227-b48e706fbccb)
-
-    
-8) Restart your Putty Session. After the device is responding to ping again or after some 2 minutes, Right click your putty window's top bar and select 'Restart Session'. Login with root and your password set earlier.
-
-![image](https://github.com/user-attachments/assets/2162be36-0e93-4763-9b2a-774ada502acc)
-
-
-9) Issue the command:
+7) Access the Cerbo GX through Putty and execute the command:
+```bash
+init q
+```
+At this time, the inittab will reinitialse and start the battery service script.
+If it does not you may need to issue a reboot command:
+```bash
+reboot
+```
+8) After the reboot, Issue the command:
 ```bash
 ps | grep dbus-canbus
 ```
@@ -99,12 +95,6 @@ EG: 20155 root     31212 S    /usr/bin/python3 /opt/victronenergy/dbus-canbus-ba
 # Troubleshooting
 You may run into some issues if I've forgotten any dependencies since I started this little project.
 Here are some potential fixes that you should execute in Putty session to the Cerbo GX.
-
-- Permissions not set for the files:
-```bash
-chmod +x /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
-chmod +x /opt/victronenergy/dbus-canbus-battery/start-delayed.sh
-```
 
 - Python Not Installed or Incompatible Version or Missing Dependencies
 ```bash
