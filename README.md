@@ -3,9 +3,10 @@ Service for Victron ecosystem run on Venus OS which takes CANBUS data from BMS a
 This is my second github repo, it might even be slightly better than the first!
 As such, all information, files, suggestions are to be used at your own risk, I offer zero guarantees implied or otherwise.
 
-# Update 15June2025
-* I have made some changes to the python script to include necessary debugging.
-* I have updated the method for starting the script and monitoring it's running, rebooting when required.
+# Update 21July2025
+* Added an `install.sh` script that downloads the repository to `/data` and registers
+  a persistent service under `/opt/victronenergy/service/`.
+* The service now starts via the Utilities service manager rather than `inittab`.
 * I did a factory reinstall with the latest venus image just to be sure that it is starting fresh again. Guide: [Factory Reinstall](https://www.victronenergy.com/media/pg/Cerbo_GX/en/reset-to-factory-defaults-and-venus-os-reinstall.html)
 
 ## THIS SOLUTION DOES NOT PERSIST SOFTWARE UPDATES TO THE CERBO GX ##
@@ -21,13 +22,17 @@ From this point forward I will refer to the Venus OS device as Cerbo GX and inst
 # Quick Start
 1) Make a cable that joins the GND,HIGH,LOW pins on your Battery BMS to the Cerbo GX corresponding pins.
 2) Enable root account and SSH: [Root Access](https://www.victronenergy.com/live/ccgx:root_access)
-3) Access the Cerbo GX through WinSCP.
-4) Copy the 'dbus-canbus-battery' folder to: /opt/victronenergy/
-5) Copy the 'inittab' file to: /etc/ overwriting the existing.
-6) Access the Cerbo GX through Putty and execute the reboot command.
-7) Go to the fridge and retrieve a cold beverage.
-8) Restart your Putty Session
-9) Check the running processes for succesful starting of the service.
+3) SSH to the Cerbo GX and run the install script:
+```bash
+wget https://raw.githubusercontent.com/Spidy01/dbus-canbus-battery/main/install.sh -O install.sh
+sh install.sh
+```
+4) Reboot the device once the script completes.
+5) Go to the fridge and retrieve a cold beverage.
+6) After the reboot, check the running processes for the service:
+```bash
+ps | grep dbus-canbus
+```
 
 
 
@@ -42,55 +47,28 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 2) Follow the guide at the victron site: [Root Access](https://www.victronenergy.com/live/ccgx:root_access)
 
 
-3) Download WinSCP if you are a windows user and set up a new connection to your Cerbo GX using the root account details you have just created. You should be presented with a list of folders and files. As an example:
-
-![image](https://github.com/user-attachments/assets/529bd6df-8475-4ab9-b38c-ed88c1a92a25)
-
-
-4) Copy the 'dbus-canbus-battery' folder to: /opt/victronenergy/ . You can drag and drop the files from Windows Explorer or upload through the WinSCP interface. This step creates the folder dbus-canbus-battery and also adds the required files. can-mappings.json defines the canbus registers and the appropriate pairing with the dbus paths. dbus-canbus-battery.py script initiates the canbus listening, data handling and publishing of data onto the dbus.
-
-![image](https://github.com/user-attachments/assets/7dfd3263-62e8-49a0-96ba-b9bb30cdd991)
-
-
-
-5) Copy the 'inittab' file to: /etc/ . You now must navigate upwards to the root folder then into the /etc/ folder. Copy the inittab file to this folder. This file ensures that the service will start whenever the Cerbo is rebooted and will ensure the service is restarted should there be any error. The service will not run without this file unless you start it manually with python dbus-canbus-battery.py from within the /opt/victronenergy/ folder.
-
-6) Now set the permissions for the files:
+3) Open an SSH session to your Cerbo GX.
+4) Download and execute the installer which will place the code under `/data` and register the service:
 ```bash
-chmod +x /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
-chmod +x /opt/victronenergy/dbus-canbus-battery/start-delayed.sh
+wget https://raw.githubusercontent.com/Spidy01/dbus-canbus-battery/main/install.sh -O install.sh
+sh install.sh
 ```
-   
-7) Access the Cerbo GX through Putty and execute the command:
-```bash
-init q
-```
-At this time, the inittab will reinitialse and start the battery service script.
-If it does not you may need to issue a reboot command:
+5) Reboot the device:
 ```bash
 reboot
 ```
-8) After the reboot, Issue the command:
+6) After the reboot, verify the service is running:
 ```bash
 ps | grep dbus-canbus
 ```
-You should see something like this:
+You should see something like:
 
-root@einstein:~# ps | grep dbus-canbus  
-19832 root      2560 T    cat /var/log/dbus-canbus-battery.log  
-20155 root      2952 S    {start-delayed.s} /bin/sh /opt/victronenergy/dbus-canbus-battery/start-delayed.sh  
-20361 root      2692 S    grep dbus-canbus  
+```
+root@cerbo:~# ps | grep dbus-canbus
+1234 root      2952 S    /usr/bin/python3 /data/dbus-canbus-battery/dbus-canbus-battery.py
+```
 
-The second line is the startup script, this is currently counting down 180 seconds until main script starting.
-If you only have the line with grep dbus-canbus present then the service is NOT running and you need to troubleshoot why. 
-![image](https://github.com/user-attachments/assets/0831ab84-918f-45fc-a64b-d4eaf5f1ad3b)
-
-
-After the 180 seconds have passsed, you can repeat the command `ps | grep dbus-canbus`.
-Now you should see the starter script dissapear and the actual script running.
-EG: 20155 root     31212 S    /usr/bin/python3 /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
-
-![image](https://github.com/user-attachments/assets/5a8f1818-5607-44db-a4c4-45ebeb2b8623)
+If you only have the line with `grep dbus-canbus` present then the service is **not** running and you need to troubleshoot why.
 
 # Troubleshooting
 You may run into some issues if I've forgotten any dependencies since I started this little project.
@@ -109,7 +87,7 @@ pip3 install dbus-python python-can
 ```
 - Manual Service Starting
 ```bash
-python3 /opt/victronenergy/dbus-canbus-battery/dbus-canbus-battery.py
+python3 /data/dbus-canbus-battery/dbus-canbus-battery.py
 ```
 - View Logs
 ```bash
