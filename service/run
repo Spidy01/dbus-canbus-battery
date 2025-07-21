@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "*** starting dbus-modbus-client ***"
+exec 2>&1
+exec /data/dbus-canbus-battery/dbus-canbus-battery.py
