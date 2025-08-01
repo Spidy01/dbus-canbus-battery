@@ -21,13 +21,22 @@ logging.basicConfig(
 # Set the PYTHONPATH programmatically to ensure 'vedbus' can be found
 os.environ['PYTHONPATH'] = '/data/velib_python-master:' + os.environ.get('PYTHONPATH', '')
 
-# Load CAN ID mappings from JSON
-with open('/opt/victronenergy/dbus-canbus-battery/can-mappings.json') as f:
+# Load CAN ID mappings from JSON.
+# The file lives in the same directory as this script when installed so use the
+# location of this file to build the path.  Previously the path pointed to
+# '/opt/victronenergy/dbus-canbus-battery/can-mappings.json' which does not
+# exist when running the service from /data.  Using a relative path ensures the
+# service can find the mappings regardless of the installation directory.
+CAN_MAPPING_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'can-mappings.json')
+with open(CAN_MAPPING_PATH) as f:
     CAN_MAPPINGS = json.load(f)
     logging.debug(f"Loaded CAN_MAPPINGS: {json.dumps(CAN_MAPPINGS, indent=2)}")
 
 class DbusBatteryService:
+    """Service that exposes battery metrics on D-Bus by reading CAN messages."""
     def __init__(self):
+        """Initialise the service and start CAN processing threads."""
         self.mainloop = DBusGMainLoop(set_as_default=True)
         self._dbusservice = VeDbusService('com.victronenergy.battery.canbusbattery', register=False)
 
@@ -81,17 +90,23 @@ class DbusBatteryService:
         self._can_listener()
 
     def _start_dbus_update_loop(self):
+        """Run the GLib main loop that publishes buffered data to D-Bus."""
         logging.info("Starting D-Bus update loop...")
         GLib.timeout_add(1000, self._update)
         mainloop = GLib.MainLoop()
         mainloop.run()
 
     def _can_listener(self):
+        """Spawn candump and begin streaming CAN data."""
         logging.info("Starting CAN listener...")
-        self.proc = subprocess.Popen(['candump', 'can1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        self.proc = subprocess.Popen(['candump', 'can1'],
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     text=True)
         self._process_can_output()
 
     def _process_can_output(self):
+        """Parse the raw output of candump and store values for averaging."""
         logging.info("Started processing CAN output...")
         try:
             while True:
@@ -119,6 +134,7 @@ class DbusBatteryService:
             self.proc.terminate()
 
     def _parse_can_data(self, can_id, data):
+        """Convert a CAN frame into values based on CAN_MAPPINGS."""
         mapping = CAN_MAPPINGS[can_id]
         for path, config in mapping.items():
             try:
@@ -139,6 +155,7 @@ class DbusBatteryService:
                 logging.error(f"Error parsing {path} from CAN ID {can_id}: {e}")
 
     def _extract_value(self, data, bytes_list, data_type, scale, byte_order=None, bit=None, true_value=2, false_value=0):
+        """Return a scaled value from the byte array based on the given format."""
         raw_bytes = [data[i] for i in bytes_list]
         if byte_order == "reversed":
             raw_bytes.reverse()
@@ -155,14 +172,17 @@ class DbusBatteryService:
         return scaled_value
 
     def _average(self, values):
+        """Return the average of a list of numbers or None when empty."""
         return sum(values) / len(values) if values else None
 
     def _calculate_available_capacity(self):
+        """Update the available capacity based on SoC and installed capacity."""
         available_capacity = int(self.installed_capacity * (self.soc / 100))
         logging.info(f"Setting /Capacity (Available Capacity): {available_capacity}")
         self._dbusservice['/Capacity'] = available_capacity
 
     def _send_averaged_data(self):
+        """Publish averaged values to the D-Bus and calculate derived metrics."""
         nr_of_modules_online = None
         voltage = None
         current = None
@@ -195,6 +215,7 @@ class DbusBatteryService:
             self._calculate_available_capacity()
 
     def _update(self):
+        """Dummy callback for GLib timeout - keeps the loop alive."""
         logging.debug("Updating D-Bus battery data...")
         return True
 
