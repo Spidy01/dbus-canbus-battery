@@ -116,7 +116,8 @@ class DbusBatteryService:
                     logging.debug(f"Parsed CAN ID: {can_id}, Data: {data}")
                     if can_id in CAN_MAPPINGS:
                         self._parse_can_data(can_id, data)
-                   
+                    else:
+                        logging.debug(f"CAN ID: {can_id} not present")
 
                 if time.time() - self.start_time >= 10:
                     self._send_averaged_data()
