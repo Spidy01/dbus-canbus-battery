@@ -1,7 +1,6 @@
 # dbus-canbus-battery
 Service for Victron ecosystem run on Venus OS which takes CANBUS data from BMS and publishes on dbus.
-This is my second github repo, it might even be slightly better than the first!
-As such, all information, files, suggestions are to be used at your own risk, I offer zero guarantees implied or otherwise.
+All information, files, suggestions are to be used at your own risk, I offer zero guarantees implied or otherwise.
 
 # Update 21July2025
 * Added an `install.sh` script that downloads the repository to `/data` and registers
@@ -9,9 +8,6 @@ As such, all information, files, suggestions are to be used at your own risk, I 
 * The service now starts via the Utilities service manager rather than `inittab`.
 * I did a factory reinstall with the latest venus image just to be sure that it is starting fresh again. Guide: [Factory Reinstall](https://www.victronenergy.com/media/pg/Cerbo_GX/en/reset-to-factory-defaults-and-venus-os-reinstall.html)
 
-## THIS SOLUTION DOES NOT PERSIST SOFTWARE UPDATES TO THE CERBO GX ##
-You will be required to repeat the steps below after each update. If you have some tips on how I can improve this solution to persist updates I'd be very appreciative.
-The solution is confirmed working for Venus OS v3.60 on Cerbo GX.
 
 # Background
 This solution follows on from the previous project: [Samsung-Victron-ESS](https://github.com/o-snoopy-o/Samsung-Victron-ESS) which utilised an Arduino to capture CANBUS messages and convert them to MQTT messages for victron dbus. This solution eliminates the Arduino and allows the use of the BMS-CAN interface on the Cerbo GX directly. It could however utilise any CANBUS interface on any host system with minor modifications.
@@ -64,13 +60,26 @@ ps | grep dbus-canbus
 You should see something like:
 
 ```
-root@cerbo:~# ps | grep dbus-canbus
-1234 root      2952 S    /usr/bin/python3 /data/dbus-canbus-battery/dbus-canbus-battery.py
+root@einstein:~# ps | grep dbus-canbus
+  943 root      1768 S    supervise dbus-canbus-battery
+  964 root     31948 S    python3 /data/dbus-canbus-battery/dbus-canbus-batter
+  966 root      1780 S    multilog t s25000 n4 /var/log/dbus-canbus-battery
+ 2414 root      2704 S    grep dbus-canbus
 ```
 
 If you only have the line with `grep dbus-canbus` present then the service is **not** running and you need to troubleshoot why.
 
 # Troubleshooting
+First troubleshooting step is to run the `ps | grep dbus-canbus` command as before to ensure the service is running.
+
+**If the service is running:**
+- Check the log files by running the command
+```bash
+cat /var/log/dbus-canbus-battery/current
+```
+check for last entries.
+
+**If the service is not running**
 You may run into some issues if I've forgotten any dependencies since I started this little project.
 Here are some potential fixes that you should execute in Putty session to the Cerbo GX.
 
