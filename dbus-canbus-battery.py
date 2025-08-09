@@ -14,7 +14,7 @@ from dbus.mainloop.glib import DBusGMainLoop
 
 # Configure logging to output to stdout so daemontools can capture it
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s %(levelname)s: %(message)s',
     stream=sys.stdout
 )
