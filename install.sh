@@ -37,6 +37,9 @@ rm -f "$ZIP_NAME"
 mv "$TMP_DIR" "$FINAL_DIR"
 cd "$FINAL_DIR"
 
+# Ensure log directory exists for multilog
+mkdir -p /var/log/dbus-canbus-battery
+
 # Ensure Python and run scripts are executable
 find . -name "*.py" -type f -exec chmod +x {} +
 find service -name run -type f -exec chmod +x {} +

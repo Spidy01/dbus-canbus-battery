@@ -76,9 +76,12 @@ First troubleshooting step is to run the `ps | grep dbus-canbus` command as befo
 **If the service is running:**
 - Check the log files by running the command
 ```bash
-cat /var/log/dbus-canbus-battery/current
+tail -F /var/log/dbus-canbus-battery/current | tai64nlocal
 ```
 - check for last entries.
+
+- For more verbose logging, restart the service with `LOG_LEVEL=DEBUG` set so
+  debug messages are written to the log.
 
 **If the service is not running**
 You may run into some issues if I've forgotten any dependencies since I started this little project.
@@ -101,7 +104,7 @@ python3 /data/dbus-canbus-battery/dbus-canbus-battery.py
 ```
 - View Logs
 ```bash
-tail -f /var/log/dbus-canbus-battery.log
+tail -F /var/log/dbus-canbus-battery/current | tai64nlocal
 ```
 
 # Proof it works :p

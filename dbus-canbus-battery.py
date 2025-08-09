@@ -3,6 +3,7 @@
 import os
 import json
 import logging
+import sys
 import subprocess
 import threading
 import time
@@ -11,12 +12,12 @@ from gi.repository import GLib
 import platform
 from dbus.mainloop.glib import DBusGMainLoop
 
-# Configure logging to write to a file with timestamps
+# Configure logging to output to stdout so daemontools can capture it
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
-    level=logging.WARNING,
+    level=getattr(logging, log_level, logging.INFO),
     format='%(asctime)s %(levelname)s: %(message)s',
-    filename='/var/log/dbus-canbus-battery.log',
-    filemode='a'
+    stream=sys.stdout
 )
 
 # Set the PYTHONPATH programmatically to ensure 'vedbus' can be found
