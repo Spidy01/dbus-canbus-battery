@@ -77,7 +77,7 @@ First troubleshooting step is to run the `ps | grep dbus-canbus` command as befo
 ```bash
 cat /var/log/dbus-canbus-battery/current
 ```
-check for last entries.
+- check for last entries.
 
 **If the service is not running**
 You may run into some issues if I've forgotten any dependencies since I started this little project.
