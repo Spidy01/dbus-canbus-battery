@@ -7,6 +7,7 @@ All information, files, suggestions are to be used at your own risk, I offer zer
   a persistent service under `/opt/victronenergy/service/`.
 * The service now starts via the Utilities service manager rather than `inittab`.
 * I did a factory reinstall with the latest venus image just to be sure that it is starting fresh again. Guide: [Factory Reinstall](https://www.victronenergy.com/media/pg/Cerbo_GX/en/reset-to-factory-defaults-and-venus-os-reinstall.html)
+* The service only registers on D-Bus after receiving CAN messages and toggles the `/Connected` path if communication is lost.
 
 
 # Background
