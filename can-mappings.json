@@ -31,5 +31,38 @@
         "/System/MinCellTemperature": { "bytes": [6], "type": "S8", "scale": 1, "precision": 0 },
         "/System/MaxCellTemperature": { "bytes": [5], "type": "S8", "scale": 1, "precision": 0 },
         "/Dc/0/Temperature": { "bytes": [5], "type": "S8", "scale": 1, "precision": 1 }
+    },
+    "500": {
+        "/Dc/0/Voltage": { "bytes": [0, 1], "type": "U16", "scale": 0.01, "byte_order": "reversed", "precision": 3 },
+        "/Dc/0/Current": { "bytes": [2, 3], "type": "S16", "scale": 1, "byte_order": "reversed", "precision": 1 },
+        "/Soc": { "bytes": [4], "type": "U8", "scale": 1, "precision": 0 },
+        "/Soh": { "bytes": [5], "type": "U8", "scale": 1, "precision": 0 }
+    },
+    "501": {
+        "/System/NrOfModulesOnline": { "bytes": [5], "type": "U8", "scale": 1, "precision": 0 },
+        "/System/NrOfModulesOffline": { "bytes": [6], "type": "U8", "scale": 1, "precision": 0 },
+        "/Alarms/HighVoltage": { "bytes": [0], "bit": 0, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/LowVoltage": { "bytes": [0], "bit": 1, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/HighTemperature": { "bytes": [0], "bit": 2, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/LowTemperature": { "bytes": [0], "bit": 3, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/HighChargeCurrent": { "bytes": [0], "bit": 4, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/HighDischargeCurrent": { "bytes": [0], "bit": 5, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/HighChargeTemperature": { "bytes": [0], "bit": 6, "type": "bool", "true_value": 2, "false_value": 0 },
+        "/Alarms/CellImbalance": { "bytes": [1], "bit": 5, "type": "bool", "true_value": 2, "false_value": 0 }
+    },
+    "502": {
+        "/Info/MaxChargeVoltage": { "bytes": [0, 1], "type": "U16", "scale": 0.1, "byte_order": "reversed", "precision": 1 },
+        "/Info/MaxChargeCurrent": { "bytes": [2, 3], "type": "U16", "scale": 0.1, "byte_order": "reversed", "precision": 1 },
+        "/Info/MaxDischargeCurrent": { "bytes": [4, 5], "type": "U16", "scale": 0.1, "byte_order": "reversed", "precision": 1 },
+        "/Info/BatteryLowVoltage": { "bytes": [6, 7], "type": "U16", "scale": 0.1, "byte_order": "reversed", "precision": 1 }
+    },
+    "503": {
+        "/System/MinCellVoltage": { "bytes": [4, 5], "type": "U16", "scale": 0.001, "byte_order": "reversed", "precision": 3 },
+        "/System/MaxCellVoltage": { "bytes": [2, 3], "type": "U16", "scale": 0.001, "byte_order": "reversed", "precision": 3 }
+    },
+    "504": {
+        "/System/MinCellTemperature": { "bytes": [6], "type": "S8", "scale": 1, "precision": 0 },
+        "/System/MaxCellTemperature": { "bytes": [5], "type": "S8", "scale": 1, "precision": 0 },
+        "/Dc/0/Temperature": { "bytes": [5], "type": "S8", "scale": 1, "precision": 1 }
     }
 }
