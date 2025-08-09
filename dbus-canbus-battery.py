@@ -95,7 +95,7 @@ class DbusBatteryService:
     def _can_listener(self):
         """Spawn candump and begin streaming CAN data."""
         log.info("Starting CAN listener...")
-        self.proc = subprocess.Popen(['candump', 'can1'],
+        self.proc = subprocess.Popen(['candump', 'can0'],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      text=True)
