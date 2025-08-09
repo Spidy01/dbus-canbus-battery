@@ -37,8 +37,9 @@ rm -f "$ZIP_NAME"
 mv "$TMP_DIR" "$FINAL_DIR"
 cd "$FINAL_DIR"
 
-# Make main script executable
-chmod +x dbus-canbus-battery.py
+# Ensure Python and run scripts are executable
+find . -name "*.py" -type f -exec chmod +x {} +
+find service -name run -type f -exec chmod +x {} +
 
 # Create symlink to Victron service directory
 echo "Creating symlink to Victron service directory..."
