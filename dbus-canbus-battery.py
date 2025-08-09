@@ -6,7 +6,6 @@ import logging
 import subprocess
 import threading
 import time
-import select
 from vedbus import VeDbusService
 from gi.repository import GLib
 import platform
@@ -53,7 +52,7 @@ class DbusBatteryService:
         self._dbusservice.add_path('/ProductName', 'ELPM482-00005')
         self._dbusservice.add_path('/FirmwareVersion', 0)
         self._dbusservice.add_path('/HardwareVersion', 0)
-        self._dbusservice.add_path('/Connected', 0)
+        self._dbusservice.add_path('/Connected', 1)
 
         # Paths
         self._dbusservice.add_path('/Info/MaxDischargeCurrent', 0.0)
@@ -79,10 +78,7 @@ class DbusBatteryService:
         for alarm in ['HighVoltage', 'LowVoltage', 'HighTemperature', 'LowTemperature', 'HighChargeCurrent', 'HighDischargeCurrent', 'HighChargeTemperature', 'CellImbalance']:
             self._dbusservice.add_path(f'/Alarms/{alarm}', 0)
 
-        self.service_registered = False
-        self.connected = False
-        self.last_message_time = None
-        self.connection_timeout = 5
+        self._dbusservice.register()
 
         self.data_buffer = {path: [] for can_id in CAN_MAPPINGS for path in CAN_MAPPINGS[can_id]}
         self.precision_buffer = {path: CAN_MAPPINGS[can_id][path].get("precision") for can_id in CAN_MAPPINGS for path in CAN_MAPPINGS[can_id]}
@@ -93,12 +89,6 @@ class DbusBatteryService:
 
         threading.Thread(target=self._start_dbus_update_loop).start()
         self._can_listener()
-
-    def _register_dbus_service(self):
-        if not self.service_registered:
-            self._dbusservice.register()
-            self.service_registered = True
-            logging.info("D-Bus service registered")
 
     def _start_dbus_update_loop(self):
         """Run the GLib main loop that publishes buffered data to D-Bus."""
@@ -121,34 +111,20 @@ class DbusBatteryService:
         logging.info("Started processing CAN output...")
         try:
             while True:
-                rlist, _, _ = select.select([self.proc.stdout], [], [], 1)
-                if rlist:
-                    output = self.proc.stdout.readline()
-                    if output == '' and self.proc.poll() is not None:
-                        break
-                    if output:
-                        self.last_message_time = time.time()
-                        if not self.service_registered:
-                            self._register_dbus_service()
-                        if not self.connected:
-                            self.connected = True
-                            self._dbusservice['/Connected'] = 1
-                        logging.debug(f"candump output: {output.strip()}")
-                        parts = output.split()
-                        can_id = parts[1]
-                        data = parts[3:]
-                        if data[0] == '[8]':
-                            data = data[1:]
-                        logging.debug(f"Parsed CAN ID: {can_id}, Data: {data}")
-                        if can_id in CAN_MAPPINGS:
-                            self._parse_can_data(can_id, data)
-                else:
-                    if self.proc.poll() is not None:
-                        break
-                    if self.connected and self.last_message_time and time.time() - self.last_message_time > self.connection_timeout:
-                        logging.warning("Connection to battery lost")
-                        self.connected = False
-                        self._dbusservice['/Connected'] = 0
+                output = self.proc.stdout.readline()
+                if output == '' and self.proc.poll() is not None:
+                    break
+                if output:
+                    logging.debug(f"candump output: {output.strip()}")
+                    parts = output.split()
+                    can_id = parts[1]
+                    data = parts[3:]
+                    if data[0] == '[8]':
+                        data = data[1:]
+                    logging.debug(f"Parsed CAN ID: {can_id}, Data: {data}")
+                    if can_id in CAN_MAPPINGS:
+                        self._parse_can_data(can_id, data)
+                   
 
                 if time.time() - self.start_time >= 10:
                     self._send_averaged_data()
