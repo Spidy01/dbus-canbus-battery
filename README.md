@@ -46,7 +46,7 @@ Ensure that you have the CANBUS cable connected to the BMS and the Cerbo GX. The
 3) Open an SSH session to your Cerbo GX.
 4) Download and execute the installer which will place the code under `/data` and register the service:
 ```bash
-wget https://raw.githubusercontent.com/Spidy01/dbus-canbus-battery/main/install.sh -O install.sh
+wget https://raw.githubusercontent.com/o-snoopy-o/dbus-canbus-battery/main/install.sh -O install.sh
 sh install.sh
 ```
 5) Reboot the device:
