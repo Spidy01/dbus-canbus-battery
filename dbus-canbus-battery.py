@@ -22,11 +22,18 @@ logging.basicConfig(
 # Set the PYTHONPATH programmatically to ensure 'vedbus' can be found
 os.environ['PYTHONPATH'] = '/data/velib_python-master:' + os.environ.get('PYTHONPATH', '')
 
-# Load CAN ID mappings from JSON
-with open('/opt/victronenergy/dbus-canbus-battery/can-mappings.json') as f:
+# Load CAN ID mappings from JSON.
+# The file lives in the same directory as this script when installed so use the
+# location of this file to build the path.  Previously the path pointed to
+# '/opt/victronenergy/dbus-canbus-battery/can-mappings.json' which does not
+# exist when running the service from /data.  Using a relative path ensures the
+# service can find the mappings regardless of the installation directory.
+CAN_MAPPING_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'can-mappings.json')
+with open(CAN_MAPPING_PATH) as f:
     CAN_MAPPINGS = json.load(f)
     logging.debug(f"Loaded CAN_MAPPINGS: {json.dumps(CAN_MAPPINGS, indent=2)}")
-
+    
 class DbusBatteryService:
     def __init__(self):
         self.mainloop = DBusGMainLoop(set_as_default=True)
