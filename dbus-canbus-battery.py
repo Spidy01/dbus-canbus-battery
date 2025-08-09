@@ -119,7 +119,7 @@ class DbusBatteryService:
                     else:
                         logging.debug(f"CAN ID: {can_id} not present")
 
-                if time.time() - self.start_time >= 10:
+                if time.time() - self.start_time >= 2:
                     self._send_averaged_data()
                     self.start_time = time.time()
                     self.data_buffer = {path: [] for can_id in CAN_MAPPINGS for path in CAN_MAPPINGS[can_id]}
