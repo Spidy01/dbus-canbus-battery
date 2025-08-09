@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
 import json
@@ -12,27 +11,23 @@ import platform
 from dbus.mainloop.glib import DBusGMainLoop
 
 # Configure logging to write to a file with timestamps
-log = logging.getLogger()
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    filename='/var/log/dbus-canbus-battery.log',
+    filemode='a'
+)
 
 # Set the PYTHONPATH programmatically to ensure 'vedbus' can be found
 os.environ['PYTHONPATH'] = '/data/velib_python-master:' + os.environ.get('PYTHONPATH', '')
 
-# Load CAN ID mappings from JSON.
-# The file lives in the same directory as this script when installed so use the
-# location of this file to build the path.  Previously the path pointed to
-# '/opt/victronenergy/dbus-canbus-battery/can-mappings.json' which does not
-# exist when running the service from /data.  Using a relative path ensures the
-# service can find the mappings regardless of the installation directory.
-CAN_MAPPING_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                'can-mappings.json')
-with open(CAN_MAPPING_PATH) as f:
+# Load CAN ID mappings from JSON
+with open('/opt/victronenergy/dbus-canbus-battery/can-mappings.json') as f:
     CAN_MAPPINGS = json.load(f)
-    log.debug(f"Loaded CAN_MAPPINGS: {json.dumps(CAN_MAPPINGS, indent=2)}")
+    logging.debug(f"Loaded CAN_MAPPINGS: {json.dumps(CAN_MAPPINGS, indent=2)}")
 
 class DbusBatteryService:
-    """Service that exposes battery metrics on D-Bus by reading CAN messages."""
     def __init__(self):
-        """Initialise the service and start CAN processing threads."""
         self.mainloop = DBusGMainLoop(set_as_default=True)
         self._dbusservice = VeDbusService('com.victronenergy.battery.canbusbattery', register=False)
 
@@ -86,37 +81,31 @@ class DbusBatteryService:
         self._can_listener()
 
     def _start_dbus_update_loop(self):
-        """Run the GLib main loop that publishes buffered data to D-Bus."""
-        log.info("Starting D-Bus update loop...")
+        logging.info("Starting D-Bus update loop...")
         GLib.timeout_add(1000, self._update)
         mainloop = GLib.MainLoop()
         mainloop.run()
 
     def _can_listener(self):
-        """Spawn candump and begin streaming CAN data."""
-        log.info("Starting CAN listener...")
-        self.proc = subprocess.Popen(['candump', 'can0'],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     text=True)
+        logging.info("Starting CAN listener...")
+        self.proc = subprocess.Popen(['candump', 'can1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         self._process_can_output()
 
     def _process_can_output(self):
-        """Parse the raw output of candump and store values for averaging."""
-        log.info("Started processing CAN output...")
+        logging.info("Started processing CAN output...")
         try:
             while True:
                 output = self.proc.stdout.readline()
                 if output == '' and self.proc.poll() is not None:
                     break
                 if output:
-                    log.debug(f"candump output: {output.strip()}")
+                    logging.debug(f"candump output: {output.strip()}")
                     parts = output.split()
                     can_id = parts[1]
                     data = parts[3:]
                     if data[0] == '[8]':
                         data = data[1:]
-                    log.debug(f"Parsed CAN ID: {can_id}, Data: {data}")
+                    logging.debug(f"Parsed CAN ID: {can_id}, Data: {data}")
                     if can_id in CAN_MAPPINGS:
                         self._parse_can_data(can_id, data)
                    
@@ -126,11 +115,10 @@ class DbusBatteryService:
                     self.start_time = time.time()
                     self.data_buffer = {path: [] for can_id in CAN_MAPPINGS for path in CAN_MAPPINGS[can_id]}
         except KeyboardInterrupt:
-            log.info("Process interrupted. Stopping the listener.")
+            logging.info("Process interrupted. Stopping the listener.")
             self.proc.terminate()
 
     def _parse_can_data(self, can_id, data):
-        """Convert a CAN frame into values based on CAN_MAPPINGS."""
         mapping = CAN_MAPPINGS[can_id]
         for path, config in mapping.items():
             try:
@@ -144,14 +132,13 @@ class DbusBatteryService:
                     true_value=config.get("true_value", 2),
                     false_value=config.get("false_value", 0)
                 )
-                log.debug(f"Parsed {path} from {can_id}: {value}")
+                logging.debug(f"Parsed {path} from {can_id}: {value}")
                 if value is not None:
                     self.data_buffer[path].append(value)
             except Exception as e:
-                log.error(f"Error parsing {path} from CAN ID {can_id}: {e}")
+                logging.error(f"Error parsing {path} from CAN ID {can_id}: {e}")
 
     def _extract_value(self, data, bytes_list, data_type, scale, byte_order=None, bit=None, true_value=2, false_value=0):
-        """Return a scaled value from the byte array based on the given format."""
         raw_bytes = [data[i] for i in bytes_list]
         if byte_order == "reversed":
             raw_bytes.reverse()
@@ -164,21 +151,18 @@ class DbusBatteryService:
         elif data_type == "S16":
             raw_value = int.from_bytes(raw_value.to_bytes(2, 'big'), 'big', signed=True)
         scaled_value = raw_value * scale
-        log.debug(f"Extracted value: raw={raw_value}, scaled={scaled_value}, type={data_type}")
+        logging.debug(f"Extracted value: raw={raw_value}, scaled={scaled_value}, type={data_type}")
         return scaled_value
 
     def _average(self, values):
-        """Return the average of a list of numbers or None when empty."""
         return sum(values) / len(values) if values else None
 
     def _calculate_available_capacity(self):
-        """Update the available capacity based on SoC and installed capacity."""
         available_capacity = int(self.installed_capacity * (self.soc / 100))
-        log.info(f"Setting /Capacity (Available Capacity): {available_capacity}")
+        logging.info(f"Setting /Capacity (Available Capacity): {available_capacity}")
         self._dbusservice['/Capacity'] = available_capacity
 
     def _send_averaged_data(self):
-        """Publish averaged values to the D-Bus and calculate derived metrics."""
         nr_of_modules_online = None
         voltage = None
         current = None
@@ -188,9 +172,9 @@ class DbusBatteryService:
                 precision = self.precision_buffer.get(path)
                 if precision is not None:
                     avg_value = float(f"{avg_value:.{precision}f}")
-                log.info(f"Setting averaged {path}: {avg_value}")
+                logging.info(f"Setting averaged {path}: {avg_value}")
                 self._dbusservice[path] = avg_value
-                log.debug(f"D-Bus write: {path} = {avg_value}")
+                logging.debug(f"D-Bus write: {path} = {avg_value}")
                 if path == '/Dc/0/Voltage':
                     voltage = avg_value
                 elif path == '/Dc/0/Current':
@@ -201,20 +185,19 @@ class DbusBatteryService:
                     self.soc = int(avg_value)
         if voltage is not None and current is not None:
             power = round(voltage * current)
-            log.info(f"Setting /Dc/0/Power: {power}")
+            logging.info(f"Setting /Dc/0/Power: {power}")
             self._dbusservice['/Dc/0/Power'] = power
         if nr_of_modules_online is not None:
             self.installed_capacity = nr_of_modules_online * 94
-            log.info(f"Setting /InstalledCapacity: {self.installed_capacity}")
+            logging.info(f"Setting /InstalledCapacity: {self.installed_capacity}")
             self._dbusservice['/InstalledCapacity'] = self.installed_capacity
         if self.installed_capacity and self.soc:
             self._calculate_available_capacity()
 
     def _update(self):
-        """Dummy callback for GLib timeout - keeps the loop alive."""
-        log.debug("Updating D-Bus battery data...")
+        logging.debug("Updating D-Bus battery data...")
         return True
 
 if __name__ == "__main__":
     service = DbusBatteryService()
-    log.info('Battery D-Bus service initialized and running.')
+    logging.info('Battery D-Bus service initialized and running.')

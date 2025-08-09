@@ -1,4 +1,4 @@
 #!/bin/sh
-echo "*** starting dbus-modbus-client ***"
+echo "*** starting dbus-canbus-battery ***"
 exec 2>&1
-exec /data/dbus-canbus-battery/dbus-canbus-battery.py
+exec /data/dbus-canbus-battery/dbus-canbus-battery.py >> /var/log/dbus-canbus-battery.log 2>&1
