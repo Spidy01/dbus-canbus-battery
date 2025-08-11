@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Define paths
 INSTALL_DIR="/data"
-REPO_AUTHOR="spidy01"
+REPO_AUTHOR="Spidy01"
 REPO_NAME="dbus-canbus-battery"
 ZIP_NAME="repo.zip"
 TMP_DIR="${INSTALL_DIR}/${REPO_NAME}-main"
