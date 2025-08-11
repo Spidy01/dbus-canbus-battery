@@ -20,7 +20,7 @@ From this point forward I will refer to the Venus OS device as Cerbo GX and inst
 2) Enable root account and SSH: [Root Access](https://www.victronenergy.com/live/ccgx:root_access)
 3) SSH to the Cerbo GX and run the install script:
 ```bash
-wget https://raw.githubusercontent.com/o-snoopy-o/dbus-canbus-battery/main/install.sh -O install.sh
+wget https://raw.githubusercontent.com/spidy01/dbus-canbus-battery/main/install.sh -O install.sh
 sh install.sh
 ```
 4) Reboot the device once the script completes.
